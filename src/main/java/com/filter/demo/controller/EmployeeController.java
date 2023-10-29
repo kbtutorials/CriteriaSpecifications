@@ -31,4 +31,12 @@ public class EmployeeController {
         return employeeService.getEmployeesBetweenDates(input);
     }
 
+    @GetMapping("/ByLike")
+    List<Employee> ByLikeOperation(@RequestBody SpecificationInput input){
+        return employeeService.getEmployeeByLike(input);
+    }
+    @GetMapping("/ByGreaterThanEqual")
+    List<Employee> ByGreaterThanEqual(@RequestBody SpecificationInput input){
+        return employeeService.getGreaterThan(input);
+    }
 }

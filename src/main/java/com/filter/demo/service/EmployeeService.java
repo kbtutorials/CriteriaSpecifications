@@ -43,7 +43,7 @@ public class EmployeeService {
     }
     public List<Employee> getEmployeeData(SpecificationInput specificationInput) {
         Specification<Employee> specification = getSpecification(specificationInput);
-        employeeRepo.count()
+
         return  employeeRepo.findAll(specification);
     }
 
@@ -75,10 +75,24 @@ public class EmployeeService {
 
     }
 
-    Specification<Employee> getEmployeeSpecificationByLike(SpecificationInput input){
-        return 
+    private Specification<Employee> getEmployeeSpecificationByLike(SpecificationInput input){
+       return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get(input.getColumnName()),
+               "%"+input.getValue()+"%");
 
     }
+    public List<Employee> getEmployeeByLike(SpecificationInput specificationInput){
+        Specification<Employee> employeeSpecification = getEmployeeSpecificationByLike(specificationInput);
+        return employeeRepo.findAll(employeeSpecification);
+    }
 
+    private Specification<Employee> getSpecificationByGreaterThan(SpecificationInput input){
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThan(root.get(input.getColumnName()),input.getValue());
+
+    }
+    public List<Employee> getGreaterThan(SpecificationInput input){
+        Specification<Employee> specificationByGreaterThan = getSpecificationByGreaterThan(input);
+         return employeeRepo.findAll(specificationByGreaterThan);
+
+    }
 
 }
