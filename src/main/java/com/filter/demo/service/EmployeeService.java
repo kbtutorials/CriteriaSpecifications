@@ -1,13 +1,17 @@
 package com.filter.demo.service;
 
 import com.filter.demo.model.Employee;
+import com.filter.demo.model.SearchSpecification;
 import com.filter.demo.model.SpecificationInput;
 import com.filter.demo.repo.EmployeeRepo;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.XSlf4j;
+import org.hibernate.Session;
 import org.hibernate.persister.collection.mutation.RowMutationOperations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +31,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EmployeeService {
     private final EmployeeRepo employeeRepo;
-
+    private final Session session;
 
     private Specification<Employee> getSpecification(){
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("name"),"ramu");
@@ -86,13 +92,91 @@ public class EmployeeService {
     }
 
     private Specification<Employee> getSpecificationByGreaterThan(SpecificationInput input){
-        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThan(root.get(input.getColumnName()),input.getValue());
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get(input.getColumnName()),input.getValue());
 
     }
-    public List<Employee> getGreaterThan(SpecificationInput input){
+    public long getGreaterThan(SpecificationInput input){
         Specification<Employee> specificationByGreaterThan = getSpecificationByGreaterThan(input);
-         return employeeRepo.findAll(specificationByGreaterThan);
+        Long empCount =  employeeRepo.count(specificationByGreaterThan);
+        System.out.println("Emp count is :"+empCount);
+        boolean emExists = employeeRepo.exists(specificationByGreaterThan);
+        System.out.println("Emp Exists :"+emExists);
+        long deleteStatus = 0;
+        if(emExists){
+           deleteStatus= employeeRepo.delete(specificationByGreaterThan);
+        }
+       return  deleteStatus;
 
     }
+    private List<Employee> getSpecificationByIn(SpecificationInput input){
+        String[] values = input.getValue().split(",");
+        List<String> empList = Arrays.asList(values);
+        return (root, query, criteriaBuilder) -> {
+            final CriteriaQuery<Employee> cquery = criteriaBuilder.createQuery(Employee.class);
+
+
+            Query query2 = session.createQuery( cquery.select(root)
+                    .where(root.get("name").in(empList)));
+            List resultList = query2.getResultList();
+            return resultList;
+        };
+
+    }
+    public List<Employee> getEmployeeByIn(SpecificationInput specificationInput){
+        Specification<Employee> employeeSpecification = getSpecificationByIn(specificationInput);
+        return employeeRepo.findAll(employeeSpecification);
+    }
+
+
+    private Specification<Employee> getSpecificationForList
+            (List<SearchSpecification> searchSpecificationList,String overalOp){
+
+        List<Predicate> predicateList = new ArrayList<>();
+        return (root, query, criteriaBuilder) -> {
+            for (SearchSpecification sf : searchSpecificationList) {
+                String operation = sf.getOperation();
+                switch (operation) {
+                    case "EQUAL" -> {
+                        Predicate equal = criteriaBuilder.equal(root.get(sf.getColumnName()), sf.getValue());
+                        predicateList.add(equal);
+                    }
+                    case "GREATER_THAN" -> {
+                        Predicate greaterThan = criteriaBuilder.greaterThan(root.get(sf.getColumnName()), sf.getValue());
+                        predicateList.add(greaterThan);
+                    }
+                    case "GREATER_THAN_EQUAL" -> {
+                        Predicate greaterThanOrEqualTo = criteriaBuilder.greaterThanOrEqualTo(root.get(sf.getColumnName()), sf.getValue());
+                        predicateList.add(greaterThanOrEqualTo);
+                    }
+                    case "LESS_THAN" -> {
+                        Predicate lessThan = criteriaBuilder.lessThan(root.get(sf.getColumnName()), sf.getValue());
+                        predicateList.add(lessThan);
+                    }
+                    case "LESS_THAN_EQUAL" -> {
+                        Predicate lessThanOrEqualTo = criteriaBuilder.lessThanOrEqualTo(root.get(sf.getColumnName()), sf.getValue());
+                        predicateList.add(lessThanOrEqualTo);
+                    }
+                    case "LIKE" -> {
+                        Predicate like = criteriaBuilder.like(root.get(sf.getColumnName()), "%" + sf.getValue() + "%");
+                        predicateList.add(like);
+                    }
+                }
+
+            }
+            if ("AND".equalsIgnoreCase(overalOp)) {
+                return criteriaBuilder.and(predicateList.toArray(predicateList.toArray(new Predicate[0])));
+            } else {
+                return criteriaBuilder.or(predicateList.toArray(predicateList.toArray(new Predicate[0])));
+            }
+        };
+
+    }
+    public List<Employee> getDetailsFromList(List<SearchSpecification> searchSpecificationList,String op){
+        Specification<Employee> specification= getSpecificationForList(searchSpecificationList,op);
+        return employeeRepo.findAll(specification);
+
+
+    }
+
 
 }

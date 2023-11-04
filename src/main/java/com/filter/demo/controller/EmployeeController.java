@@ -1,6 +1,7 @@
 package com.filter.demo.controller;
 
 import com.filter.demo.model.Employee;
+import com.filter.demo.model.RequestDTO;
 import com.filter.demo.model.SpecificationInput;
 import com.filter.demo.service.EmployeeService;
 import lombok.AllArgsConstructor;
@@ -37,6 +38,11 @@ public class EmployeeController {
     }
     @GetMapping("/ByGreaterThanEqual")
     List<Employee> ByGreaterThanEqual(@RequestBody SpecificationInput input){
-        return employeeService.getGreaterThan(input);
+        return employeeService.getEmployeeByIn(input);
+    }
+
+    @GetMapping("/ByList")
+    List<Employee> byList(@RequestBody RequestDTO input){
+        return employeeService.getDetailsFromList(input.getSpecificationList(),input.getOverallOperation());
     }
 }
