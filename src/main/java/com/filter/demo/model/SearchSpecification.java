@@ -13,4 +13,6 @@ public class SearchSpecification {
     private String columnName;
     private String value;
     private String operation;
+    private String joinTable;
+
 }

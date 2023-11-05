@@ -1,8 +1,10 @@
 package com.filter.demo;
 
+import com.filter.demo.model.Address;
 import com.filter.demo.model.Employee;
 import com.filter.demo.model.Student;
 import com.filter.demo.model.Subject;
+import com.filter.demo.repo.AddressRepo;
 import com.filter.demo.repo.EmployeeRepo;
 import com.filter.demo.repo.StudentRepo;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,7 @@ public class FilterDemoApplication implements CommandLineRunner {
 
 	private final StudentRepo studentRepo;
 	private final EmployeeRepo employeeRepo;
+	private final AddressRepo addressRepo;
 
 	public static void main(String[] args) {
 		SpringApplication.run(FilterDemoApplication.class, args);
@@ -117,17 +120,40 @@ public class FilterDemoApplication implements CommandLineRunner {
 
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
+		Address ad = new Address();
+		ad.setCity("Hyderabad");
+		addressRepo.save(ad);
+
+		Address ad1 = new Address();
+		ad1.setCity("Pune");
+		addressRepo.save(ad1);
+
+		Address ad2 = new Address();
+		ad2.setCity("Mumbai");
+		addressRepo.save(ad2);
+
+		Address ad3 = new Address();
+		ad3.setCity("Koachi");
+		addressRepo.save(ad3);
+
+		Address ad4 = new Address();
+		ad4.setCity("Kolkata");
+		addressRepo.save(ad4);
+
+
 		Employee em = new Employee();
 		em.setName("sainath");
 		em.setSalary(30000);
 		em.setSkill(Subject.ENGLISH);
 		em.setDoj(formatter.parse("10/12/2015"));
+		em.setAddress(ad);
 		employeeRepo.save(em);
 
 		Employee em1 = new Employee();
 		em1.setName("rama");
 		em1.setSalary(50000);
 		em1.setSkill(Subject.HINDI);
+		em1.setAddress(ad1);
 		em1.setDoj(formatter.parse("4/06/2016"));
 		employeeRepo.save(em1);
 
@@ -136,6 +162,7 @@ public class FilterDemoApplication implements CommandLineRunner {
 		em2.setName("karthik");
 		em2.setSalary(50000);
 		em2.setSkill(Subject.MATHS);
+		em2.setAddress(ad2);
 		em2.setDoj(formatter.parse("03/04/2018"));
 		employeeRepo.save(em2);
 
@@ -143,6 +170,7 @@ public class FilterDemoApplication implements CommandLineRunner {
 		em3.setName("naresh");
 		em3.setSalary(10000);
 		em3.setSkill(Subject.ENGLISH);
+		em3.setAddress(ad3);
 		em3.setDoj(formatter.parse("10/12/2016"));
 		employeeRepo.save(em3);
 
@@ -150,9 +178,9 @@ public class FilterDemoApplication implements CommandLineRunner {
 		em4.setName("rambabu");
 		em4.setSalary(40000);
 		em4.setSkill(Subject.TELUGU);
+		em4.setAddress(ad4);
 		em4.setDoj(formatter.parse("10/12/2015"));
 		employeeRepo.save(em4);
-
 
 
 

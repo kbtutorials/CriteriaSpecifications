@@ -4,15 +4,9 @@ import com.filter.demo.model.Employee;
 import com.filter.demo.model.SearchSpecification;
 import com.filter.demo.model.SpecificationInput;
 import com.filter.demo.repo.EmployeeRepo;
-import jakarta.persistence.Query;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.XSlf4j;
-import org.hibernate.Session;
-import org.hibernate.persister.collection.mutation.RowMutationOperations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +25,6 @@ import java.util.List;
 @AllArgsConstructor
 public class EmployeeService {
     private final EmployeeRepo employeeRepo;
-    private final Session session;
 
     private Specification<Employee> getSpecification(){
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("name"),"ramu");
@@ -108,17 +101,12 @@ public class EmployeeService {
        return  deleteStatus;
 
     }
-    private List<Employee> getSpecificationByIn(SpecificationInput input){
+    private Specification<Employee> getSpecificationByIn(SpecificationInput input){
         String[] values = input.getValue().split(",");
         List<String> empList = Arrays.asList(values);
         return (root, query, criteriaBuilder) -> {
-            final CriteriaQuery<Employee> cquery = criteriaBuilder.createQuery(Employee.class);
+            return root.get(input.getColumnName()).in(List.of(values));
 
-
-            Query query2 = session.createQuery( cquery.select(root)
-                    .where(root.get("name").in(empList)));
-            List resultList = query2.getResultList();
-            return resultList;
         };
 
     }
@@ -159,6 +147,15 @@ public class EmployeeService {
                     case "LIKE" -> {
                         Predicate like = criteriaBuilder.like(root.get(sf.getColumnName()), "%" + sf.getValue() + "%");
                         predicateList.add(like);
+                    }
+                    case "IN" ->{
+                       String[] sp = sf.getValue().split(",");
+                       Predicate in = root.get(sf.getColumnName()).in(List.of(sp));
+                       predicateList.add(in);
+                    }
+                    case "JOIN" ->{
+                        Predicate join  = criteriaBuilder.equal(root.join(sf.getJoinTable()).get(sf.getColumnName()), sf.getValue());
+                        predicateList.add(join);
                     }
                 }
 

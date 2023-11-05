@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -25,5 +26,9 @@ public class Employee {
     @DateTimeFormat(pattern="dd/MM/yyyy")
     private Date doj;
     private Subject skill;
+
+    @OneToOne
+    @JoinColumn(name = "address_id",referencedColumnName = "id")
+    private Address address;
 
 }
