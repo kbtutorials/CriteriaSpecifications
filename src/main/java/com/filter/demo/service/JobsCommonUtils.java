@@ -15,7 +15,7 @@ public class JobsCommonUtils {
 
         return JobBuilder
                 .newJob(className)
-                .withIdentity(className.getSimpleName())
+                .withIdentity(className.getSimpleName(),"First")
                 .setJobData(jobDataMap)
                 .build();
     }
@@ -32,7 +32,7 @@ public class JobsCommonUtils {
         return TriggerBuilder
                 .newTrigger()
                 .withIdentity(className.getSimpleName())
-                .withSchedule(builder)
+                .withSchedule(CronScheduleBuilder.cronSchedule("0/20 * * * * ?"))
                 .startAt(new Date(System.currentTimeMillis()+timerInfo.getInitialOffSet()))
                 .build();
     }

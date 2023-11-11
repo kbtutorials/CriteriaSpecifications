@@ -14,7 +14,7 @@ public class DisPlayNameSchedule {
 
     @PostConstruct
     public void init(){
-        TimerInfo timerInfo = new TimerInfo(0,true,2000,1000,"secpd");
+        TimerInfo timerInfo = new TimerInfo(10,false,2000,1000,"secpd");
 
         schedular.scheduleJob(DisplaySomethingJob.class,timerInfo);
     }

@@ -1,5 +1,7 @@
 package com.filter.demo;
 
+import com.azure.security.keyvault.secrets.SecretClient;
+import com.azure.security.keyvault.secrets.models.KeyVaultSecret;
 import com.filter.demo.model.Address;
 import com.filter.demo.model.Employee;
 import com.filter.demo.model.Student;
@@ -24,6 +26,7 @@ public class FilterDemoApplication implements CommandLineRunner {
 	private final StudentRepo studentRepo;
 	private final EmployeeRepo employeeRepo;
 	private final AddressRepo addressRepo;
+	private final SecretClient secretClient;
 
 	public static void main(String[] args) {
 		SpringApplication.run(FilterDemoApplication.class, args);
@@ -31,6 +34,10 @@ public class FilterDemoApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		KeyVaultSecret hello = secretClient.getSecret("hello");
+		log.info(hello.getValue()+"***Secret being created");
+
+
 		log.info("Started student entity saving");
 		Student student = new Student();
 		student.setName("ramu");

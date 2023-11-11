@@ -4,6 +4,8 @@ import com.filter.demo.model.Employee;
 import com.filter.demo.model.SearchSpecification;
 import com.filter.demo.model.SpecificationInput;
 import com.filter.demo.repo.EmployeeRepo;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.persistence.criteria.Predicate;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +27,16 @@ import java.util.List;
 @AllArgsConstructor
 public class EmployeeService {
     private final EmployeeRepo employeeRepo;
+
+    @PostConstruct
+    public void init(){
+        System.out.println("Excuting...");
+    }
+
+    @PreDestroy
+    public void clear(){
+        System.out.println("closingg");
+    }
 
     private Specification<Employee> getSpecification(){
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("name"),"ramu");
